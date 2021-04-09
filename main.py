@@ -185,20 +185,19 @@ def users_to_survey():
     all = users.find({})
     res = []
     now = datetime.now()
-    interval = 60 * 60 * 24  # 24 hours
+    interval = 60*5  # 5 minutes
     for i in all:
         last = i['lastSession']
         if (last == 'dummy'):
             res.append(i['_id'])
         delta = now - last
-        if (delta.total_seconds() > interval):
+        if (delta.total_seconds() > interval and i['sessionOn']==False):
             res.append(i['_id'])
 
     return res
 
 
-for s in res:
-    print(s['eng'])
+
 
 print('Done')
 
@@ -257,7 +256,7 @@ def survey(update, context):
     if (get_session_state(update.effective_chat.id)):
         delta = datetime.now() - lastSurvey
         minutes_elapsed = delta.total_seconds() / 60
-        if(minutes_elapsed>5):
+        if(minutes_elapsed>4):
             last_msg = get_last_msg(update.effective_chat.id)
             context.bot.delete_message(chat_id=update.effective_chat.id,
                                        message_id=last_msg)
@@ -271,7 +270,7 @@ def survey(update, context):
     if (lastSurvey != None):
         delta = datetime.now() - lastSurvey
         minutes_elapsed = delta.total_seconds() / 60
-        if (minutes_elapsed < 1):
+        if (minutes_elapsed < 2):
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text=strings[lang]['survey.successive'])
             return
@@ -544,13 +543,15 @@ def scheduled_survey(context: CallbackContext):
 
 
 # set this to run repeatedly
-updater.job_queue.run_repeating(scheduled_survey, 3600)
+updater.job_queue.run_repeating(scheduled_survey, 60)
 
 
 # trying radar chart
 
 # utility functions
-def user_answers(chatId):
+def user_answers(chatId=None):
+    if chatId==None:
+        return answers.find({})
     return answers.find({'chatId': chatId})
 
 
@@ -570,6 +571,7 @@ def question_scale(questionId):
 
 
 def scale_answer(answer):
+    #print((float(answer['answer']) / question_scale(answer['questionId'])) * 10)
     return (float(answer['answer']) / question_scale(answer['questionId'])) * 10
 
 
@@ -580,13 +582,14 @@ def get_tags_from_answer(questionId):
     return res['tags']
 
 
-def get_scores(chatId):
+def get_scores(chatId=None):
     aspects = get_aspects()
-    print(aspects)
+    #print(aspects)
 
     res = {}
     sum = {}
     count = {}
+
     answers = user_answers(chatId)
 
     for a in aspects:
@@ -599,7 +602,7 @@ def get_scores(chatId):
             continue
         for tag in aspects:
             if tag in tags:
-                sum[tag] = scale_answer(answer)
+                sum[tag] += scale_answer(answer)
                 count[tag]+=1
 
     for a in aspects:
@@ -612,12 +615,18 @@ def get_scores(chatId):
 
 def print_aspects(chatId):
     res = get_scores(chatId)
+    all = get_scores()
     print(res)
-    make_chart(res,chatId = chatId)
+    used_aspects = {}
+    for a in all:
+        if a in res:
+            used_aspects[a] = all[a]
+
+    make_chart(res,used_aspects,chatId = chatId)
     return res
 
 
-def make_chart(scores: dict,chatId = None):
+def make_chart(scores: dict,all_scores: dict,chatId = None):
     # some other things we need
     labels = list(scores.keys())
     points = len(labels)
@@ -627,13 +636,18 @@ def make_chart(scores: dict,chatId = None):
     print(angles)
     values = list(scores.values())
     values += values[:1]
+    all_values = list(all_scores.values())
+    all_values+=all_values[:1]
     print(values)
     ## Create plot object
     fig, ax = plt.subplots(figsize=(6, 6),
                            subplot_kw=dict(polar=True))  ## Plot a new diamond with the add_to_star function
 
-    ax.plot(angles, values, color='#1aaf6c', linewidth=1, label='Your happiness chart')
-    ax.fill(angles, values, color='#1aaf6c', alpha=0.25)
+    ax.plot(angles, values, color='#d42cea', linewidth=1, label='Your happiness chart')
+    ax.fill(angles, values, color='#d42cea', alpha=0.25)
+
+    ax.plot(angles, all_values, color='#1aaf6c', linewidth=1, label='Happiness of Innopolis')
+    ax.fill(angles, all_values, color='#1aaf6c', alpha=0.25)
 
     # making it look pretty
 
@@ -665,6 +679,7 @@ def make_chart(scores: dict,chatId = None):
     ax.set_thetagrids(np.degrees(angles), labels)
     lang = get_language(chatId)
     ax.set_title(strings[lang]['chart.title'], y=1.18)
+    ax.legend(loc='upper right', bbox_to_anchor=(0.2, 1.2))
 
     '''
     # ax.set_rgrids([]) # This removes grid lines# Change the color of the ticks
@@ -694,6 +709,10 @@ def make_chart(scores: dict,chatId = None):
          # 'generic': 33.333333333333336, 'Health': 7.0, 'Political': 40.0, 'Psychological': 90.0}
 
 #make_chart(sample)
+
+for s in res:
+    print(s['eng'])
+    print(question_scale(s['_id']))
 updater.start_polling()
 
 
