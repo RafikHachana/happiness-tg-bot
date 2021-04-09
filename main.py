@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pymongo
 from telegram import *
-from telegram import ext
+from telegram.ext import *
 import emoji
 import re
 
