@@ -37,7 +37,10 @@ def add_user(chatId, firstName, lastName, userName):
         'userName': userName,
         'lang': 'eng',
         'lastSession': 'dummy',
-        'sessionOn': False
+        'sessionOn': False,
+        'birthdate': 'dummy',
+        'job': 'dummy',
+        'country': 'dummy'
     }
     print(chatId)
     if users.find_one({'_id': chatId}) != None:
@@ -162,6 +165,18 @@ def set_children(chat_id, data):
 def set_country(chat_id, data):
     users.update_one({'_id': chat_id}, {'$set': {'country': data}})
 
+def set_gender(chat_id, data):
+    users.update_one({'_id': chat_id}, {'$set': {'gender': data}})
+
+def get_birthdate(chat_id):
+    return users.find_one({'_id':chat_id})['birthdate']
+
+def get_country(chat_id):
+    return users.find_one({'_id':chat_id})['country']
+
+def get_job(chat_id):
+    return users.find_one({'_id':chat_id})['job']
+
 
 res = get_all_questions()
 
@@ -194,7 +209,7 @@ def make_keyboard(answer_format):
     l = len(answer_format)
     res = []
     for i in range(l):
-        item = InlineKeyboardButton(answer_format[l - i - 1], callback_data=str(i))
+        item = InlineKeyboardButton(answer_format[l - i - 1], callback_data=str(l-i-1))
         res.append([item])
     return res
 
@@ -218,9 +233,10 @@ reply_kb_markup = ReplyKeyboardMarkup(main_menu_keyboard,
 def start(update, context):
     add_user(update.effective_chat.id, update.effective_chat.first_name, update.effective_chat.last_name,
              update.effective_chat.username)
+
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Hello " + update.effective_chat.first_name + "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\n Use the command /survey to start answering questions.\n\n"
-                                                                                "Type /help if you wanna discover more about my features.",
+                             text=strings['eng']['start.hello'] + update.effective_chat.first_name + strings['eng']['start.rest']
+                             +'\n\n'+strings['rus']['start.hello'] + update.effective_chat.first_name + strings['rus']['start.rest'],
                              reply_markup=reply_kb_markup)
 
 
@@ -230,16 +246,12 @@ dispatcher.add_handler(start_handler)
 # inline keyboards
 
 
-next_question_keyboard = [
-    [
-        InlineKeyboardButton("Another question "+emoji.emojize(':winking_face:'), callback_data='another'),
-        InlineKeyboardButton("Enough for today "+ emoji.emojize(':sleeping_face:'), callback_data='enough'),
-    ]
-]
+
 
 
 # for the command survey
 def survey(update, context):
+    lang = get_language(update.effective_chat.id)
     lastSurvey = last_survey_session(update.effective_chat.id)
 
     if (get_session_state(update.effective_chat.id)):
@@ -248,13 +260,12 @@ def survey(update, context):
         if(minutes_elapsed>5):
             last_msg = get_last_msg(update.effective_chat.id)
             context.bot.delete_message(chat_id=update.effective_chat.id,
-                               message_id=last_msg)
+                                       message_id=last_msg)
             close_survey_session(update.effective_chat.id)
 
         else:
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="You already opened another survey, you should finish that one first! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
-                                      "Or, you can wait for 5 minutes and you will be able to do a new survey.")
+                                     text=strings[lang]['survey.duplicate'])
             return
 
     if (lastSurvey != None):
@@ -262,14 +273,11 @@ def survey(update, context):
         minutes_elapsed = delta.total_seconds() / 60
         if (minutes_elapsed < 1):
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="You did a survey less than 5 minutes ago! "
-                                          "I don't think your happiness changed that much!"+emoji.emojize(':face_with_rolling_eyes:')+
-                                          " You should at least wait 5 minutes between surveys!")
+                                     text=strings[lang]['survey.successive'])
             return
 
     start_survey_session(update.effective_chat.id)
     question = pick_question(update.effective_chat.id)
-    lang = get_language(update.effective_chat.id)
     msg = context.bot.send_message(chat_id=update.effective_chat.id,
                                    text=question[lang],
                                    reply_markup=InlineKeyboardMarkup(make_keyboard(question['format'][lang])))
@@ -281,30 +289,27 @@ dispatcher.add_handler(survey_handler)
 
 # for the command settings
 
-settings_keyboard = [
-    [
-        InlineKeyboardButton("Language "+emoji.emojize(':books:'), callback_data='lang')
 
-    ]
-    ,
-    [
-        InlineKeyboardButton("Add information about myself "+emoji.emojize(':information:'), callback_data='extraInfo')
-    ]
-]
 
-language_keyboard = [[InlineKeyboardButton("English "+emoji.emojize(':United_Kingdom:'), callback_data='eng')],
-                     [InlineKeyboardButton("Russian"+emoji.emojize(':Russia:'), callback_data='rus')]]
 
-add_info_keyboard = [[InlineKeyboardButton("Gender "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'), callback_data='gender')],
-                     [InlineKeyboardButton("Birthdate "+emoji.emojize(':birthday_cake:'), callback_data='birthdate')],
-                     [InlineKeyboardButton("Job or occupation" +emoji.emojize(':briefcase:'), callback_data='job')],
-                     [InlineKeyboardButton("Nationality "+emoji.emojize(':globe_showing_Europe-Africa:'), callback_data='country')],
-                     [InlineKeyboardButton("Marital status "+emoji.emojize(':heart_with_ribbon:'), callback_data='marital')],
-                     [InlineKeyboardButton("Number of children "+emoji.emojize(':baby:'), callback_data='children')]]
 
 
 def settings(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="-- SETTINGS --",
+    lang = get_language(update.effective_chat.id)
+
+    settings_keyboard = [
+        [
+            InlineKeyboardButton(strings[lang]['keyboard.settings.lang'], callback_data='lang')
+
+        ]
+        ,
+        [
+            InlineKeyboardButton(strings[lang]['keyboard.settings.info'],
+                                 callback_data='extraInfo')
+        ]
+    ]
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text=strings[lang]['settings'],
                              reply_markup=InlineKeyboardMarkup(settings_keyboard))
 
 
@@ -312,14 +317,15 @@ dispatcher.add_handler(CommandHandler('settings', settings))
 
 
 def profile(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Give me a minute! I'm computing your happiness profile ... "+emoji.emojize(':hourglass_not_done:'))
+    lang = get_language(update.effective_chat.id)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=strings[lang]['computing_happiness'])
 
     res = print_aspects(update.effective_chat.id)
     context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(str(update.effective_chat.id)+'.png', 'rb'))
-    msg = "YOUR HAPPINESS PROFILE IS HERE "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nSo, here is a chart of your strong happiness aspects, and here are the individual scores: \n\n"
+    msg = strings[lang]['happiness.first']
     for a in res:
         msg += a + " : " + str(int(res[a]*100)/100) + " / 10 \n"
-    msg+= "\nNote: these scores are your all time scores"
+    msg+= strings[lang]['happiness.second']
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=msg)
 
@@ -328,94 +334,148 @@ dispatcher.add_handler(CommandHandler('happiness_profile', profile))
 
 
 def help(update, context):
+    lang = get_language(update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="You seem a bit curious about what I can do, here is some help for you! "+emoji.emojize(':information:')+"\n \n"
-                                  "I support the following commands:\n"
-                                  "/survey : to start a short happiness survey, I will start by asking you one question, and then you decide if you want to continue or not. I think a maximum of 10 questions a day is enough for you, so I will keep that in check.\n\n"
-                                  "/settings: If you don't understand me, you can change the language here. I also offer you to share some information about yourself so that I can know the context of your life, if you don't mind of course. \n\n"
-                                  "/happiness_profile: The most exciting one. Here I can reveal to you what I learnt about your happiness, I will show some fancy graphs and the evolution of your well-being over time.")
+                             text= strings[lang]['help'])
 
 
 dispatcher.add_handler(CommandHandler('help', help))
 
 
+
 # for handling inline keyboard buttons
 def button(update, context):
     query = update.callback_query
+    lang = get_language(update.effective_chat.id)
     query.answer()
+
+    next_question_keyboard = [
+        [
+            InlineKeyboardButton(strings[lang]['keyboard.continue_survey'], callback_data='another'),
+            InlineKeyboardButton(strings[lang]['keyboard.stop_survey'], callback_data='enough'),
+        ]
+    ]
 
     # continue survey or not
     if query.data == 'another':
         question = pick_question(update.effective_chat.id)
         if question == None:
-            query.message.edit_text(
-                'I guess that you have answered enough questions for today! You can chill now and be happy! '+emoji.emojize(':beaming_face_with_smiling_eyes:'))
+            query.message.edit_text(strings[lang]['survey.enough'])
             close_survey_session(update.effective_chat.id)
             return
-        lang = get_language(update.effective_chat.id)
+
         query.message.edit_text(question[lang])
         query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(make_keyboard(question['format'][lang])))
         return
 
     if query.data == 'enough':
-        query.message.edit_text("Survey done, thank you for sharing with me! Have a nice day!"+emoji.emojize(':smiling_face_with_hearts:'))
+        query.message.edit_text(strings[lang]['survey.done'])
         close_survey_session(update.effective_chat.id)
         return
 
     # settings menu
+
+    language_keyboard = [[InlineKeyboardButton("English " + emoji.emojize(':United_Kingdom:'), callback_data='eng')],
+                         [InlineKeyboardButton("Русский " + emoji.emojize(':Russia:'), callback_data='rus')]]
+
+    add_info_keyboard = [[InlineKeyboardButton(strings[lang]['keyboard.settings.info.gender'], callback_data='gender')],
+                         [InlineKeyboardButton(strings[lang]['keyboard.settings.info.birthdate'],
+                                               callback_data='birthdate')],
+                         [InlineKeyboardButton(strings[lang]['keyboard.settings.info.job'],
+                                               callback_data='job')],
+                         [InlineKeyboardButton(strings[lang]['keyboard.settings.info.country'],
+                                               callback_data='country')],
+                         [InlineKeyboardButton(strings[lang]['keyboard.settings.info.marital'],
+                                               callback_data='marital')],
+                         [InlineKeyboardButton(strings[lang]['keyboard.settings.info.children'],
+                                               callback_data='children')]]
     if query.data == 'lang':
-        query.message.edit_text('Choose your language')
+        query.message.edit_text(strings[lang]['settings.lang'])
         query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(language_keyboard))
         return
 
     if query.data == 'extraInfo':
-        query.message.edit_text(
-            'The following are additional informations about yourself, you are free to share them or not. They will be used for statistics and (in the future) to give you happiness advice')
+        query.message.edit_text(strings[lang]['settings.info'])
         query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(add_info_keyboard))
         return
 
     # language settings
     if query.data == 'rus':
         set_language(update.effective_chat.id, 'rus')
-        query.message.edit_text('Questions will now be in Russian')
+        query.message.edit_text(strings['rus']['settings.lang.rus'])
         return
 
     if query.data == 'eng':
         set_language(update.effective_chat.id, 'eng')
-        query.message.edit_text('Questions will now be in English')
+        query.message.edit_text(strings['eng']['settings.lang.eng'])
         return
 
     # additional info settings
     if query.data == 'birthdate':
-        query.message.edit_text(
-            "Enter your birthdate in the following format: DD-MM-YYYY (Example: 30-06-2000) \n NOT IMPLEMENTED")
-        # query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(add_info_keyboard))
+        query.message.edit_text(strings[lang]['settings.info.birthdate'])
+        set_birthdate(update.effective_chat.id,'waiting')
+        #query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(birthdate_keyboard))
         return
 
     if query.data == 'job':
-        query.message.edit_text(
-            "What is your job title (Example: Student, CTO, Business owner, Artist, Cashier ...) \n NOT IMPLEMENTED")
+        query.message.edit_text(strings[lang]['settings.info.job'])
+        set_job(update.effective_chat.id, 'waiting')
         # query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(add_info_keyboard))
         return
 
     if query.data == 'marital':
-        query.message.edit_text("What is your marital status?")
-        marital_keyboard = [[InlineKeyboardButton("Single", callback_data='single')],
-                            [InlineKeyboardButton("Engaged/Married", callback_data='engaged')]]
+        query.message.edit_text(strings[lang]['settings.info.marital'])
+        marital_keyboard = [[InlineKeyboardButton(strings[lang]['keyboard.marital.single'], callback_data='single')],
+                            [InlineKeyboardButton(strings[lang]['keyboard.marital.partner'], callback_data='partner')],
+                            [InlineKeyboardButton(strings[lang]['keyboard.marital.married'], callback_data='engaged')]]
         query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(marital_keyboard))
         return
 
-    if query.data == 'single' or query.data == 'engaged':
+
+    #adding extra data to the db
+    if query.data == 'single' or query.data == 'engaged' or query.data=='partner':
         set_marital(update.effective_chat.id, query.data)
-        query.message.edit_text("Noted. Thanks for sharing.")
+        query.message.edit_text(strings[lang]['settings.info.thanks'])
+        return
 
     if query.data == 'country':
-        query.message.edit_text("Where are you from originally? \n NOT IMPLEMENTED")
+        set_country(update.effective_chat.id, 'waiting')
+        query.message.edit_text(strings[lang]['settings.info.country'])
         return
+
 
     if query.data == 'children':
         query.message.edit_text(
-            "How many children do you have?. \n NOT IMPLEMENTED")
+            strings[lang]['settings.info.children'])
+
+        children_keyboard = [[InlineKeyboardButton(strings[lang]['keyboard.children.none'], callback_data='none')],
+                            [InlineKeyboardButton(strings[lang]['keyboard.children.one'], callback_data='one')],
+                            [InlineKeyboardButton(strings[lang]['keyboard.children.two'], callback_data='two')],
+                             [InlineKeyboardButton(strings[lang]['keyboard.children.threeplus'], callback_data='threeplus')]]
+        query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(children_keyboard))
+        return
+    if query.data=='none' or query.data=='one'or query.data=='two' or query.data=='threeplus':
+        number = {
+            'none':0,
+            'one':1,
+            'two':2,
+            'threeplus': '3+'
+        }
+        set_children(update.effective_chat.id, number[query.data])
+        query.message.edit_text(strings[lang]['settings.info.thanks'])
+        return
+
+    if query.data=='gender':
+        query.message.edit_text(strings[lang]['settings.info.gender'])
+        gender_keyboard = [[InlineKeyboardButton(strings[lang]['keyboard.gender.male'], callback_data='male')],
+                            [InlineKeyboardButton(strings[lang]['keyboard.gender.female'], callback_data='female')],
+                            [InlineKeyboardButton(strings[lang]['keyboard.gender.other'], callback_data='other')]]
+        query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(gender_keyboard))
+        return
+
+    if query.data=='male' or query.data=='female'  or query.data=='other':
+        set_gender(update.effective_chat.id,query.data)
+        query.message.edit_text(strings[lang]['settings.info.thanks'])
         return
 
     # getting answers to the questions
@@ -425,7 +485,7 @@ def button(update, context):
                last_asked_question(update.effective_chat.id),
                answer, datetime.now())
 
-    query.message.edit_text("Do you want to answer another question?")
+    query.message.edit_text(strings[lang]['survey.continue_question'])
     query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(next_question_keyboard))
 
 
@@ -433,13 +493,34 @@ updater.dispatcher.add_handler(CallbackQueryHandler(button))
 
 
 # text input handler
-def text(context, update):
+def text(update,context):
     print("We got some text:")
+    lang = get_language(update.effective_chat.id)
+    print(update.message.text)
+    birthdate = get_birthdate(update.effective_chat.id)
 
-    x = re.search("^([1-9] |1[0-9]| 2[0-9]|3[0-1])(.|-)([1-9] | 0[1-9] |1[0-2])(.|-|)[1-2](0|9)[0-9][0-9]$",
-                  update.message.text)
-    print(x)
-    # job = job_queue.run_repeating(sayhi, 5, context=update)
+    if birthdate == 'waiting':
+        x = re.search("[0-3]?[0-9]-[0-3]?[0-9]-(?:[0-9]{2})?[0-9]{2}",
+                      update.message.text)
+        if x==None:
+            return
+
+        set_birthdate(update.effective_chat.id, x.group())
+        print(x)
+        context.bot.send_message(chat_id=update.effective_chat.id,text=strings[lang]['settings.info.thanks'])
+
+    country = get_country(update.effective_chat.id)
+
+    if country=='waiting':
+        set_country(update.effective_chat.id,update.message.text)
+        context.bot.send_message(chat_id=update.effective_chat.id, text=strings[lang]['settings.info.thanks'])
+
+    job = get_job(update.effective_chat.id)
+
+    if job == 'waiting':
+        set_job(update.effective_chat.id, update.message.text)
+        context.bot.send_message(chat_id=update.effective_chat.id, text=strings[lang]['settings.info.thanks'])
+
     return None
 
 
@@ -450,13 +531,12 @@ updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, t
 def scheduled_survey(context: CallbackContext):
     user_list = users_to_survey()
     for id in user_list:
-        context.bot.send_message(chat_id=id, text='It seems that you didn\'t check in on your happiness lately'
-                                                  'in a while. Let me ask you a random question!')
+        lang = get_language(id)
+        context.bot.send_message(chat_id=id, text=strings[lang]['auto_survey'])
 
         # starts a survey session with the user
         start_survey_session(id)
         question = pick_question(id)
-        lang = get_language(id)
         msg = context.bot.send_message(chat_id=id,
                                        text=question[lang],
                                        reply_markup=InlineKeyboardMarkup(make_keyboard(question['format'][lang])))
@@ -486,11 +566,11 @@ def get_aspects():
 
 def question_scale(questionId):
     q = questions.find_one({'_id': questionId})
-    return len(q['format']['eng'])
+    return len(q['format']['eng'])-1
 
 
 def scale_answer(answer):
-    return (float(question_scale(answer['questionId'])-answer['answer']) / question_scale(answer['questionId'])) * 10
+    return (float(answer['answer']) / question_scale(answer['questionId'])) * 10
 
 
 def get_tags_from_answer(questionId):
@@ -583,7 +663,8 @@ def make_chart(scores: dict,chatId = None):
     ax.set_facecolor('#FAFAFA')
 
     ax.set_thetagrids(np.degrees(angles), labels)
-    ax.set_title('Your happiness chart', y=1.18)
+    lang = get_language(chatId)
+    ax.set_title(strings[lang]['chart.title'], y=1.18)
 
     '''
     # ax.set_rgrids([]) # This removes grid lines# Change the color of the ticks
@@ -614,3 +695,125 @@ def make_chart(scores: dict,chatId = None):
 
 #make_chart(sample)
 updater.start_polling()
+
+
+#extra stuff
+strings = {
+    'eng': {
+        'help': "You seem a bit curious about what I can do, here is some help for you! "+emoji.emojize(':information:')+"\n \n"
+                                  "I support the following commands:\n"
+                                  "/survey : to start a short happiness survey, I will start by asking you one question, and then you decide if you want to continue or not. I think a maximum of 10 questions a day is enough for you, so I will keep that in check.\n\n"
+                                  "/settings: If you don't understand me, you can change the language here. I also offer you to share some information about yourself so that I can know the context of your life, if you don't mind of course. \n\n"
+                                  "/happiness_profile: The most exciting one. Here I can reveal to you what I learnt about your happiness, I will show some fancy graphs and the evolution of your well-being over time."
+
+
+        , 'survey.enough': 'I guess that you have answered enough questions for today! You can chill now and be happy! '+emoji.emojize(':beaming_face_with_smiling_eyes:')
+        , 'survey.done': "Survey done, thank you for sharing with me! Have a nice day!"+emoji.emojize(':smiling_face_with_hearts:')
+        , 'settings.lang': "Choose your language"
+        , 'settings.info':  'The following are additional informations about yourself, you are free to share them or not. They will be used for statistics and (in the future) to give you happiness advice'
+        , 'settings.lang.rus': 'Questions will now be in Russian'
+        , 'settings.lang.eng': 'Questions will now be in English'
+        , 'settings.info.birthdate': "Enter your birthdate below, it should be in the format DD-MM-YYYY (Example: 30-06-2000)"
+        , 'settings.info.job': "What is your job title (Example: Student, CTO, Business owner, Artist, Cashier ...)"
+        , 'settings.info.marital': "What is your marital status?"
+        , 'settings.info.children' : "How many children do you have?",
+        'settings.info.country': "Where are you from originally?",
+        'settings.info.gender': "Choose your gender",
+        'auto_survey': 'It seems that you didn\'t check in on your happiness lately'
+                                                  'in a while. Let me ask you a random question!',
+        'settings.info.thanks': "Noted. Thanks for sharing.",
+        'chart.title': 'Your happiness chart',
+        'start.hello': 'Hello ',
+        'start.rest' : "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\nUse the command /survey to start answering questions.\n\n"
+                                                                                "Type /help if you wanna discover more about my features.",
+        'survey.continue_question' : "Do you want to answer another question?",
+        'keyboard.continue_survey': "Another question "+emoji.emojize(':winking_face:'),
+        'keyboard.stop_survey': "Enough for today "+ emoji.emojize(':sleeping_face:'),
+        'survey.duplicate': "You already opened another survey, you should finish that one first! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
+                                      "Or, you can wait for 5 minutes and you will be able to do a new survey.",
+        'survey.successive': "You did a survey less than 5 minutes ago! "
+                                          "I don't think your happiness changed that much!"+emoji.emojize(':face_with_rolling_eyes:')+
+                                          " You should at least wait 5 minutes between surveys!",
+        'keyboard.settings.lang': "Language "+emoji.emojize(':books:'),
+        'keyboard.settings.info': "Add information about myself " + emoji.emojize(':information:'),
+        'keyboard.settings.info.gender': "Gender "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'),
+        'keyboard.settings.info.birthdate' : "Birthdate "+emoji.emojize(':birthday_cake:'),
+        'keyboard.settings.info.job' : "Job or occupation" +emoji.emojize(':briefcase:'),
+        'keyboard.settings.info.country' : "Nationality "+emoji.emojize(':globe_showing_Europe-Africa:'),
+        'keyboard.settings.info.marital' : "Marital status "+emoji.emojize(':heart_with_ribbon:'),
+        'keyboard.settings.info.children' : "Number of children "+emoji.emojize(':baby:'),
+        'settings': 'Settings',
+        'computing_happiness': "Give me a minute! I'm computing your happiness profile ... "+emoji.emojize(':hourglass_not_done:'),
+        'happiness.first': "YOUR HAPPINESS PROFILE IS HERE "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nSo, here is a chart of your strong happiness aspects, and here are the individual scores: \n\n",
+        'happiness.second' : "\nNote: these scores are your all time scores",
+        'keyboard.marital.single' : 'Single',
+        'keyboard.marital.partner' : 'I have a partner',
+        'keyboard.marital.married' : 'Engaged/Married',
+        'keyboard.children.none' : "I don't have children",
+        'keyboard.children.one' : "I have one child",
+        'keyboard.children.two' : "I have 2 children",
+        'keyboard.children.threeplus' : "I have 3 or more children",
+        'keyboard.gender.male' : "Male",
+        'keyboard.gender.female' : 'Female',
+        'keyboard.gender.other' : 'Other'
+
+    },
+    'rus': {
+        'help': "Вам, кажется, немного любопытно, что я могу сделать, вот вам и помощь! "+emoji.emojize(':information:')+"\n \n"
+                                  "Я поддерживаю следующие команды:\n"
+                                  "/survey : чтобы начать краткий опрос счастья, я начну с того, что задам вам один вопрос, а затем вы решите, хотите ли вы продолжать или нет. Я думаю, что вам достаточно максимум 10 вопросов в день, так что я буду держать это под контролем.\n\n"
+                                  "/settings: Если вы не понимаете меня, вы можете изменить язык здесь. Я также предлагаю вам поделиться некоторыми сведениями о себе, чтобы я мог узнать контекст вашей жизни, если вы, конечно, не возражаете. \n\n"
+                                  "/happiness_profile: Самый волнующий. Здесь я могу рассказать вам, что я узнал о вашем счастье, я покажу некоторые причудливые графики и эволюцию вашего благополучия с течением времени."
+
+
+        , 'survey.enough': 'Я думаю, что на сегодня вы ответили на достаточно вопросов! Теперь ты можешь расслабиться и быть счастливой! '+emoji.emojize(':beaming_face_with_smiling_eyes:')
+        , 'survey.done': "Опрос закончен, спасибо, что поделились со мной! Хорошего дня!"+emoji.emojize(':smiling_face_with_hearts:')
+        , 'settings.lang': "Выберите свой язык"
+        , 'settings.info':  'Ниже приведены дополнительные сведения о себе, вы вольны ими делиться или нет. Они будут использоваться для статистики и (в будущем) давать вам советы по счастью'
+        , 'settings.lang.rus': 'Вопросы теперь будут на русском языке'
+        , 'settings.lang.eng': 'Вопросы теперь будут на английском'
+        , 'settings.info.birthdate': "Введите свою дату рождения ниже, она должна быть в формате ДД-ММ-ГГГГ (пример: 30-06-2000)"
+        , 'settings.info.job': "Какова ваша должность (Пример: Студент, технический директор, Владелец бизнеса, Художник, Кассир ...)"
+        , 'settings.info.marital': "Каково ваше семейное положение?"
+        , 'settings.info.children' : "Сколько у вас детей?",
+        'settings.info.country': "Откуда вы родом?",
+        'settings.info.gender': "Выберите свой пол",
+        'auto_survey': "Похоже, ты давно не проверял свое счастье. Позвольте мне задать вам случайный вопрос!",
+        'settings.info.thanks': "Отмеченный. Спасибо, что поделились.",
+        'chart.title': 'Ваша карта счастья',
+        'start.hello': 'Привет ',
+        'start.rest' : "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\nИспользуйте команду /survey, чтобы начать отвечать на вопросы.\n\n"
+                                                                                "Введите /help, если вы хотите узнать больше о моих функциях.",
+        'survey.continue_question' : "Хотите ответить еще на один вопрос?",
+        'keyboard.continue_survey': "Еще один вопрос "+emoji.emojize(':winking_face:'),
+        'keyboard.stop_survey': "На сегодня хватит "+ emoji.emojize(':sleeping_face:'),
+        'survey.duplicate': "Вы уже открыли еще один опрос, вы должны закончить его первым! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
+                                      "Или вы можете подождать 5 минут, и вы сможете сделать новый опрос.",
+        'survey.successive': "Вы провели опрос менее 5 минут назад! "
+                                          "Не думаю, что твое счастье так уж сильно изменилось!"+emoji.emojize(':face_with_rolling_eyes:')+
+                                          " Вы должны хотя бы подождать 5 минут между опросами!",
+        'keyboard.settings.lang': "Язык "+emoji.emojize(':books:'),
+        'keyboard.settings.info': "Добавить информацию о себе " + emoji.emojize(':information:'),
+        'keyboard.settings.info.gender': "Пол "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'),
+        'keyboard.settings.info.birthdate' : "Дата рождения "+emoji.emojize(':birthday_cake:'),
+        'keyboard.settings.info.job' : "Работа или профессия" +emoji.emojize(':briefcase:'),
+        'keyboard.settings.info.country' : "Национальность "+emoji.emojize(':globe_showing_Europe-Africa:'),
+        'keyboard.settings.info.marital' : "Семейное положение "+emoji.emojize(':heart_with_ribbon:'),
+        'keyboard.settings.info.children' : "Количество детей "+emoji.emojize(':baby:'),
+        'settings': 'Настройки',
+        'computing_happiness': "Дай мне минутку! Я вычисляю твой профиль счастья ... "+emoji.emojize(':hourglass_not_done:'),
+        'happiness.first': "ВАШ ПРОФИЛЬ СЧАСТЬЯ ЗДЕСЬ "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nИтак, вот диаграмма ваших сильных аспектов счастья, а вот индивидуальные оценки: \n\n",
+        'happiness.second' : "\nПримечание: эти баллы-ваши баллы за все время",
+        'keyboard.marital.single' : 'Одиночный',
+        'keyboard.marital.partner' : 'У меня есть партнер',
+        'keyboard.marital.married' : 'Помолвлен/Женат',
+        'keyboard.children.none' : "У меня нет детей",
+        'keyboard.children.one' : "У меня один ребенок",
+        'keyboard.children.two' : "У меня 2 ребенка",
+        'keyboard.children.threeplus' : "У меня есть 3 или более детей",
+        'keyboard.gender.male' : "Мужчина",
+        'keyboard.gender.female' : 'Женский',
+        'keyboard.gender.other' : 'Другой'
+
+    }
+}
