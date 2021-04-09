@@ -3,3 +3,4 @@ pymongo~=3.9.0
 emoji~=1.2.0
 matplotlib~=3.4.1
 telegram~=0.0.1
+telegram.ext~=0.0.1
