@@ -32,6 +32,127 @@ logger = logging.getLogger(__name__)
 
 # todo think about security and encryption
 
+#extra stuff
+strings = {
+    'eng': {
+        'help': "You seem a bit curious about what I can do, here is some help for you! "+emoji.emojize(':information:')+"\n \n"
+                                  "I support the following commands:\n"
+                                  "/survey : to start a short happiness survey, I will start by asking you one question, and then you decide if you want to continue or not. I think a maximum of 10 questions a day is enough for you, so I will keep that in check.\n\n"
+                                  "/settings: If you don't understand me, you can change the language here. I also offer you to share some information about yourself so that I can know the context of your life, if you don't mind of course. \n\n"
+                                  "/happiness_profile: The most exciting one. Here I can reveal to you what I learnt about your happiness, I will show some fancy graphs and the evolution of your well-being over time."
+
+
+        , 'survey.enough': 'I guess that you have answered enough questions for today! You can chill now and be happy! '+emoji.emojize(':beaming_face_with_smiling_eyes:')
+        , 'survey.done': "Survey done, thank you for sharing with me! Have a nice day!"+emoji.emojize(':smiling_face_with_hearts:')
+        , 'settings.lang': "Choose your language"
+        , 'settings.info':  'The following are additional informations about yourself, you are free to share them or not. They will be used for statistics and (in the future) to give you happiness advice'
+        , 'settings.lang.rus': 'Questions will now be in Russian'
+        , 'settings.lang.eng': 'Questions will now be in English'
+        , 'settings.info.birthdate': "Enter your birthdate below, it should be in the format DD-MM-YYYY (Example: 30-06-2000)"
+        , 'settings.info.job': "What is your job title (Example: Student, CTO, Business owner, Artist, Cashier ...)"
+        , 'settings.info.marital': "What is your marital status?"
+        , 'settings.info.children' : "How many children do you have?",
+        'settings.info.country': "Where are you from originally?",
+        'settings.info.gender': "Choose your gender",
+        'auto_survey': 'It seems that you didn\'t check in on your happiness lately'
+                                                  'in a while. Let me ask you a random question!',
+        'settings.info.thanks': "Noted. Thanks for sharing.",
+        'chart.title': 'Your happiness chart',
+        'start.hello': 'Hello ',
+        'start.rest' : "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\nUse the command /survey to start answering questions.\n\n"
+                                                                                "Type /help if you wanna discover more about my features.",
+        'survey.continue_question' : "Do you want to answer another question?",
+        'keyboard.continue_survey': "Another question "+emoji.emojize(':winking_face:'),
+        'keyboard.stop_survey': "Enough for today "+ emoji.emojize(':sleeping_face:'),
+        'survey.duplicate': "You already opened another survey, you should finish that one first! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
+                                      "Or, you can wait for 5 minutes and you will be able to do a new survey.",
+        'survey.successive': "You did a survey less than 5 minutes ago! "
+                                          "I don't think your happiness changed that much!"+emoji.emojize(':face_with_rolling_eyes:')+
+                                          " You should at least wait 5 minutes between surveys!",
+        'keyboard.settings.lang': "Language "+emoji.emojize(':books:'),
+        'keyboard.settings.info': "Add information about myself " + emoji.emojize(':information:'),
+        'keyboard.settings.info.gender': "Gender "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'),
+        'keyboard.settings.info.birthdate' : "Birthdate "+emoji.emojize(':birthday_cake:'),
+        'keyboard.settings.info.job' : "Job or occupation" +emoji.emojize(':briefcase:'),
+        'keyboard.settings.info.country' : "Nationality "+emoji.emojize(':globe_showing_Europe-Africa:'),
+        'keyboard.settings.info.marital' : "Marital status "+emoji.emojize(':heart_with_ribbon:'),
+        'keyboard.settings.info.children' : "Number of children "+emoji.emojize(':baby:'),
+        'settings': 'Settings',
+        'computing_happiness': "Give me a minute! I'm computing your happiness profile ... "+emoji.emojize(':hourglass_not_done:'),
+        'happiness.first': "YOUR HAPPINESS PROFILE IS HERE "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nSo, here is a chart of your strong happiness aspects, and here are the individual scores: \n\n",
+        'happiness.second' : "\nNote: these scores are your all time scores",
+        'keyboard.marital.single' : 'Single',
+        'keyboard.marital.partner' : 'I have a partner',
+        'keyboard.marital.married' : 'Engaged/Married',
+        'keyboard.children.none' : "I don't have children",
+        'keyboard.children.one' : "I have one child",
+        'keyboard.children.two' : "I have 2 children",
+        'keyboard.children.threeplus' : "I have 3 or more children",
+        'keyboard.gender.male' : "Male",
+        'keyboard.gender.female' : 'Female',
+        'keyboard.gender.other' : 'Other'
+
+    },
+    'rus': {
+        'help': "Вам, кажется, немного любопытно, что я могу сделать, вот вам и помощь! "+emoji.emojize(':information:')+"\n \n"
+                                  "Я поддерживаю следующие команды:\n"
+                                  "/survey : чтобы начать краткий опрос счастья, я начну с того, что задам вам один вопрос, а затем вы решите, хотите ли вы продолжать или нет. Я думаю, что вам достаточно максимум 10 вопросов в день, так что я буду держать это под контролем.\n\n"
+                                  "/settings: Если вы не понимаете меня, вы можете изменить язык здесь. Я также предлагаю вам поделиться некоторыми сведениями о себе, чтобы я мог узнать контекст вашей жизни, если вы, конечно, не возражаете. \n\n"
+                                  "/happiness_profile: Самый волнующий. Здесь я могу рассказать вам, что я узнал о вашем счастье, я покажу некоторые причудливые графики и эволюцию вашего благополучия с течением времени."
+
+
+        , 'survey.enough': 'Я думаю, что на сегодня вы ответили на достаточно вопросов! Теперь ты можешь расслабиться и быть счастливой! '+emoji.emojize(':beaming_face_with_smiling_eyes:')
+        , 'survey.done': "Опрос закончен, спасибо, что поделились со мной! Хорошего дня!"+emoji.emojize(':smiling_face_with_hearts:')
+        , 'settings.lang': "Выберите свой язык"
+        , 'settings.info':  'Ниже приведены дополнительные сведения о себе, вы вольны ими делиться или нет. Они будут использоваться для статистики и (в будущем) давать вам советы по счастью'
+        , 'settings.lang.rus': 'Вопросы теперь будут на русском языке'
+        , 'settings.lang.eng': 'Вопросы теперь будут на английском'
+        , 'settings.info.birthdate': "Введите свою дату рождения ниже, она должна быть в формате ДД-ММ-ГГГГ (пример: 30-06-2000)"
+        , 'settings.info.job': "Какова ваша должность (Пример: Студент, технический директор, Владелец бизнеса, Художник, Кассир ...)"
+        , 'settings.info.marital': "Каково ваше семейное положение?"
+        , 'settings.info.children' : "Сколько у вас детей?",
+        'settings.info.country': "Откуда вы родом?",
+        'settings.info.gender': "Выберите свой пол",
+        'auto_survey': "Похоже, ты давно не проверял свое счастье. Позвольте мне задать вам случайный вопрос!",
+        'settings.info.thanks': "Отмеченный. Спасибо, что поделились.",
+        'chart.title': 'Ваша карта счастья',
+        'start.hello': 'Привет ',
+        'start.rest' : "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\nИспользуйте команду /survey, чтобы начать отвечать на вопросы.\n\n"
+                                                                                "Введите /help, если вы хотите узнать больше о моих функциях.",
+        'survey.continue_question' : "Хотите ответить еще на один вопрос?",
+        'keyboard.continue_survey': "Еще один вопрос "+emoji.emojize(':winking_face:'),
+        'keyboard.stop_survey': "На сегодня хватит "+ emoji.emojize(':sleeping_face:'),
+        'survey.duplicate': "Вы уже открыли еще один опрос, вы должны закончить его первым! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
+                                      "Или вы можете подождать 5 минут, и вы сможете сделать новый опрос.",
+        'survey.successive': "Вы провели опрос менее 5 минут назад! "
+                                          "Не думаю, что твое счастье так уж сильно изменилось!"+emoji.emojize(':face_with_rolling_eyes:')+
+                                          " Вы должны хотя бы подождать 5 минут между опросами!",
+        'keyboard.settings.lang': "Язык "+emoji.emojize(':books:'),
+        'keyboard.settings.info': "Добавить информацию о себе " + emoji.emojize(':information:'),
+        'keyboard.settings.info.gender': "Пол "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'),
+        'keyboard.settings.info.birthdate' : "Дата рождения "+emoji.emojize(':birthday_cake:'),
+        'keyboard.settings.info.job' : "Работа или профессия" +emoji.emojize(':briefcase:'),
+        'keyboard.settings.info.country' : "Национальность "+emoji.emojize(':globe_showing_Europe-Africa:'),
+        'keyboard.settings.info.marital' : "Семейное положение "+emoji.emojize(':heart_with_ribbon:'),
+        'keyboard.settings.info.children' : "Количество детей "+emoji.emojize(':baby:'),
+        'settings': 'Настройки',
+        'computing_happiness': "Дай мне минутку! Я вычисляю твой профиль счастья ... "+emoji.emojize(':hourglass_not_done:'),
+        'happiness.first': "ВАШ ПРОФИЛЬ СЧАСТЬЯ ЗДЕСЬ "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nИтак, вот диаграмма ваших сильных аспектов счастья, а вот индивидуальные оценки: \n\n",
+        'happiness.second' : "\nПримечание: эти баллы-ваши баллы за все время",
+        'keyboard.marital.single' : 'Одиночный',
+        'keyboard.marital.partner' : 'У меня есть партнер',
+        'keyboard.marital.married' : 'Помолвлен/Женат',
+        'keyboard.children.none' : "У меня нет детей",
+        'keyboard.children.one' : "У меня один ребенок",
+        'keyboard.children.two' : "У меня 2 ребенка",
+        'keyboard.children.threeplus' : "У меня есть 3 или более детей",
+        'keyboard.gender.male' : "Мужчина",
+        'keyboard.gender.female' : 'Женский',
+        'keyboard.gender.other' : 'Другой'
+
+    }
+}
+
 ''' DB PART '''
 
 client = pymongo.MongoClient("mongodb+srv://admin:q80O6vnEyKBaR49o@cluster0.d67oq.mongodb.net/test")
@@ -739,123 +860,4 @@ updater.start_webhook(listen="0.0.0.0",
     
 updater.idle()
 
-#extra stuff
-strings = {
-    'eng': {
-        'help': "You seem a bit curious about what I can do, here is some help for you! "+emoji.emojize(':information:')+"\n \n"
-                                  "I support the following commands:\n"
-                                  "/survey : to start a short happiness survey, I will start by asking you one question, and then you decide if you want to continue or not. I think a maximum of 10 questions a day is enough for you, so I will keep that in check.\n\n"
-                                  "/settings: If you don't understand me, you can change the language here. I also offer you to share some information about yourself so that I can know the context of your life, if you don't mind of course. \n\n"
-                                  "/happiness_profile: The most exciting one. Here I can reveal to you what I learnt about your happiness, I will show some fancy graphs and the evolution of your well-being over time."
 
-
-        , 'survey.enough': 'I guess that you have answered enough questions for today! You can chill now and be happy! '+emoji.emojize(':beaming_face_with_smiling_eyes:')
-        , 'survey.done': "Survey done, thank you for sharing with me! Have a nice day!"+emoji.emojize(':smiling_face_with_hearts:')
-        , 'settings.lang': "Choose your language"
-        , 'settings.info':  'The following are additional informations about yourself, you are free to share them or not. They will be used for statistics and (in the future) to give you happiness advice'
-        , 'settings.lang.rus': 'Questions will now be in Russian'
-        , 'settings.lang.eng': 'Questions will now be in English'
-        , 'settings.info.birthdate': "Enter your birthdate below, it should be in the format DD-MM-YYYY (Example: 30-06-2000)"
-        , 'settings.info.job': "What is your job title (Example: Student, CTO, Business owner, Artist, Cashier ...)"
-        , 'settings.info.marital': "What is your marital status?"
-        , 'settings.info.children' : "How many children do you have?",
-        'settings.info.country': "Where are you from originally?",
-        'settings.info.gender': "Choose your gender",
-        'auto_survey': 'It seems that you didn\'t check in on your happiness lately'
-                                                  'in a while. Let me ask you a random question!',
-        'settings.info.thanks': "Noted. Thanks for sharing.",
-        'chart.title': 'Your happiness chart',
-        'start.hello': 'Hello ',
-        'start.rest' : "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\nUse the command /survey to start answering questions.\n\n"
-                                                                                "Type /help if you wanna discover more about my features.",
-        'survey.continue_question' : "Do you want to answer another question?",
-        'keyboard.continue_survey': "Another question "+emoji.emojize(':winking_face:'),
-        'keyboard.stop_survey': "Enough for today "+ emoji.emojize(':sleeping_face:'),
-        'survey.duplicate': "You already opened another survey, you should finish that one first! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
-                                      "Or, you can wait for 5 minutes and you will be able to do a new survey.",
-        'survey.successive': "You did a survey less than 5 minutes ago! "
-                                          "I don't think your happiness changed that much!"+emoji.emojize(':face_with_rolling_eyes:')+
-                                          " You should at least wait 5 minutes between surveys!",
-        'keyboard.settings.lang': "Language "+emoji.emojize(':books:'),
-        'keyboard.settings.info': "Add information about myself " + emoji.emojize(':information:'),
-        'keyboard.settings.info.gender': "Gender "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'),
-        'keyboard.settings.info.birthdate' : "Birthdate "+emoji.emojize(':birthday_cake:'),
-        'keyboard.settings.info.job' : "Job or occupation" +emoji.emojize(':briefcase:'),
-        'keyboard.settings.info.country' : "Nationality "+emoji.emojize(':globe_showing_Europe-Africa:'),
-        'keyboard.settings.info.marital' : "Marital status "+emoji.emojize(':heart_with_ribbon:'),
-        'keyboard.settings.info.children' : "Number of children "+emoji.emojize(':baby:'),
-        'settings': 'Settings',
-        'computing_happiness': "Give me a minute! I'm computing your happiness profile ... "+emoji.emojize(':hourglass_not_done:'),
-        'happiness.first': "YOUR HAPPINESS PROFILE IS HERE "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nSo, here is a chart of your strong happiness aspects, and here are the individual scores: \n\n",
-        'happiness.second' : "\nNote: these scores are your all time scores",
-        'keyboard.marital.single' : 'Single',
-        'keyboard.marital.partner' : 'I have a partner',
-        'keyboard.marital.married' : 'Engaged/Married',
-        'keyboard.children.none' : "I don't have children",
-        'keyboard.children.one' : "I have one child",
-        'keyboard.children.two' : "I have 2 children",
-        'keyboard.children.threeplus' : "I have 3 or more children",
-        'keyboard.gender.male' : "Male",
-        'keyboard.gender.female' : 'Female',
-        'keyboard.gender.other' : 'Other'
-
-    },
-    'rus': {
-        'help': "Вам, кажется, немного любопытно, что я могу сделать, вот вам и помощь! "+emoji.emojize(':information:')+"\n \n"
-                                  "Я поддерживаю следующие команды:\n"
-                                  "/survey : чтобы начать краткий опрос счастья, я начну с того, что задам вам один вопрос, а затем вы решите, хотите ли вы продолжать или нет. Я думаю, что вам достаточно максимум 10 вопросов в день, так что я буду держать это под контролем.\n\n"
-                                  "/settings: Если вы не понимаете меня, вы можете изменить язык здесь. Я также предлагаю вам поделиться некоторыми сведениями о себе, чтобы я мог узнать контекст вашей жизни, если вы, конечно, не возражаете. \n\n"
-                                  "/happiness_profile: Самый волнующий. Здесь я могу рассказать вам, что я узнал о вашем счастье, я покажу некоторые причудливые графики и эволюцию вашего благополучия с течением времени."
-
-
-        , 'survey.enough': 'Я думаю, что на сегодня вы ответили на достаточно вопросов! Теперь ты можешь расслабиться и быть счастливой! '+emoji.emojize(':beaming_face_with_smiling_eyes:')
-        , 'survey.done': "Опрос закончен, спасибо, что поделились со мной! Хорошего дня!"+emoji.emojize(':smiling_face_with_hearts:')
-        , 'settings.lang': "Выберите свой язык"
-        , 'settings.info':  'Ниже приведены дополнительные сведения о себе, вы вольны ими делиться или нет. Они будут использоваться для статистики и (в будущем) давать вам советы по счастью'
-        , 'settings.lang.rus': 'Вопросы теперь будут на русском языке'
-        , 'settings.lang.eng': 'Вопросы теперь будут на английском'
-        , 'settings.info.birthdate': "Введите свою дату рождения ниже, она должна быть в формате ДД-ММ-ГГГГ (пример: 30-06-2000)"
-        , 'settings.info.job': "Какова ваша должность (Пример: Студент, технический директор, Владелец бизнеса, Художник, Кассир ...)"
-        , 'settings.info.marital': "Каково ваше семейное положение?"
-        , 'settings.info.children' : "Сколько у вас детей?",
-        'settings.info.country': "Откуда вы родом?",
-        'settings.info.gender': "Выберите свой пол",
-        'auto_survey': "Похоже, ты давно не проверял свое счастье. Позвольте мне задать вам случайный вопрос!",
-        'settings.info.thanks': "Отмеченный. Спасибо, что поделились.",
-        'chart.title': 'Ваша карта счастья',
-        'start.hello': 'Привет ',
-        'start.rest' : "! " + emoji.emojize(':grinning_face_with_big_eyes:')+"\nИспользуйте команду /survey, чтобы начать отвечать на вопросы.\n\n"
-                                                                                "Введите /help, если вы хотите узнать больше о моих функциях.",
-        'survey.continue_question' : "Хотите ответить еще на один вопрос?",
-        'keyboard.continue_survey': "Еще один вопрос "+emoji.emojize(':winking_face:'),
-        'keyboard.stop_survey': "На сегодня хватит "+ emoji.emojize(':sleeping_face:'),
-        'survey.duplicate': "Вы уже открыли еще один опрос, вы должны закончить его первым! "+emoji.emojize(':face_with_rolling_eyes:')+"\n"
-                                      "Или вы можете подождать 5 минут, и вы сможете сделать новый опрос.",
-        'survey.successive': "Вы провели опрос менее 5 минут назад! "
-                                          "Не думаю, что твое счастье так уж сильно изменилось!"+emoji.emojize(':face_with_rolling_eyes:')+
-                                          " Вы должны хотя бы подождать 5 минут между опросами!",
-        'keyboard.settings.lang': "Язык "+emoji.emojize(':books:'),
-        'keyboard.settings.info': "Добавить информацию о себе " + emoji.emojize(':information:'),
-        'keyboard.settings.info.gender': "Пол "+emoji.emojize(':female_sign:')+emoji.emojize(':male_sign:'),
-        'keyboard.settings.info.birthdate' : "Дата рождения "+emoji.emojize(':birthday_cake:'),
-        'keyboard.settings.info.job' : "Работа или профессия" +emoji.emojize(':briefcase:'),
-        'keyboard.settings.info.country' : "Национальность "+emoji.emojize(':globe_showing_Europe-Africa:'),
-        'keyboard.settings.info.marital' : "Семейное положение "+emoji.emojize(':heart_with_ribbon:'),
-        'keyboard.settings.info.children' : "Количество детей "+emoji.emojize(':baby:'),
-        'settings': 'Настройки',
-        'computing_happiness': "Дай мне минутку! Я вычисляю твой профиль счастья ... "+emoji.emojize(':hourglass_not_done:'),
-        'happiness.first': "ВАШ ПРОФИЛЬ СЧАСТЬЯ ЗДЕСЬ "+emoji.emojize(':party_popper:')+emoji.emojize(':party_popper:')+"\n\nИтак, вот диаграмма ваших сильных аспектов счастья, а вот индивидуальные оценки: \n\n",
-        'happiness.second' : "\nПримечание: эти баллы-ваши баллы за все время",
-        'keyboard.marital.single' : 'Одиночный',
-        'keyboard.marital.partner' : 'У меня есть партнер',
-        'keyboard.marital.married' : 'Помолвлен/Женат',
-        'keyboard.children.none' : "У меня нет детей",
-        'keyboard.children.one' : "У меня один ребенок",
-        'keyboard.children.two' : "У меня 2 ребенка",
-        'keyboard.children.threeplus' : "У меня есть 3 или более детей",
-        'keyboard.gender.male' : "Мужчина",
-        'keyboard.gender.female' : 'Женский',
-        'keyboard.gender.other' : 'Другой'
-
-    }
-}
