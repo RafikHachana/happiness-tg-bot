@@ -733,8 +733,9 @@ for s in res:
 #if running on heroku
 updater.start_webhook(listen="0.0.0.0",
                           port=80,
-                          url_path=tgbot_token)
-updater.bot.setWebhook('https://inno-happiness-tg-bot.herokuapp.com/' + tgbot_token)
+                          url_path=tgbot_token,
+                          webhook_url='https://inno-happiness-tg-bot.herokuapp.com/' + tgbot_token)
+#updater.bot.setWebhook('https://inno-happiness-tg-bot.herokuapp.com/' + tgbot_token)
     
 updater.idle()
 
