@@ -8,6 +8,19 @@ from telegram.ext import *
 import emoji
 import re
 
+#BEGIN HEROKU PART
+
+import os
+PORT = int(os.environ.get('PORT', 5000))
+#END HEROKU PART
+
+# Enable logging
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
 # install packages
 # python-telegram-bot
 # pymongo
@@ -713,8 +726,17 @@ def make_chart(scores: dict,all_scores: dict,chatId = None):
 for s in res:
     print(s['eng'])
     print(question_scale(s['_id']))
-updater.start_polling()
+    
+#if running locally    
+#updater.start_polling()
 
+#if running on heroku
+updater.start_webhook(listen="0.0.0.0",
+                          port=int(PORT),
+                          url_path=tgbot_token)
+    updater.bot.setWebhook('https://inno-happiness-tg-bot.herokuapp.com/' + tgbot_token)
+    
+updater.idle()
 
 #extra stuff
 strings = {
