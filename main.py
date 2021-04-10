@@ -185,7 +185,7 @@ def users_to_survey():
     all = users.find({})
     res = []
     now = datetime.now()
-    interval = 60*5  # 5 minutes
+    interval = 60*60*72  # 3 days
     for i in all:
         last = i['lastSession']
         if (last == 'dummy'):
@@ -543,7 +543,7 @@ def scheduled_survey(context: CallbackContext):
 
 
 # set this to run repeatedly
-updater.job_queue.run_repeating(scheduled_survey, 60)
+updater.job_queue.run_repeating(scheduled_survey, 60*60*24)
 
 
 # trying radar chart
